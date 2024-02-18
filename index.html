@@ -1,0 +1,438 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Lecture 10</title>
+
+		<link rel="shortcut icon" type="image/x-icon" href="uu_logo/UU_logo_color-cropped.ico">
+
+		<link rel="stylesheet" href="reveal.js/dist/reset.css">
+		<link rel="stylesheet" href="reveal.js/dist/reveal.css">
+		<link rel="stylesheet" href="reveal.js/dist/theme/black.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="atomic-one-dark.css">
+
+		<!-- Custom css -->
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<img class="logo" src="uu_logo/UU_logo_vit-cropped.svg">
+		<div class="reveal">
+			<div class="slides">
+
+<!-- BEGIN SLIDES -->
+<section data-background-image="images/background.jpg" data-background-opacity="0.2">
+	<h1>Lecture 10</h1>
+	<p>Nikolaus Huber</p>
+</section>
+
+<section data-background-image="images/bug.jpg" data-background-opacity="0.2">
+	<h1>Going beyond C</h1>
+</section>
+
+<section>
+	<h3>Outline</h3>
+	<ul>
+		<li>Languages for ESP</li>
+		<li>Synchronous Languages</li>
+		<li>Lustre</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Background</h3>
+	<ul>
+		<li class="fragment fade-up">Most ES software is written in <emph>low-level languages</emph></li>
+		<ul>
+			<li class="fragment fade-up">C/C++</li>
+			<li class="fragment fade-up">Assembly</li>
+		</ul>
+		<li class="fragment fade-up">Gives good control over hardware</li>
+		<li class="fragment fade-up">Easier to reason about timing</li>
+		<li class="fragment fade-up">Good tooling support</li>
+		<ul>
+			<li class="fragment fade-up">Compilers</li>
+			<li class="fragment fade-up">Analysis tools</li>
+			<li class="fragment fade-up">...</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>Background</h3>
+	<ul>
+		<li class="fragment fade-up">C has many problems as well</li>
+		<ul>
+			<li class="fragment fade-up">Memory has to be managed explicitly</li>
+			<li class="fragment fade-up">Type system is relatively weak</li>
+			<li class="fragment fade-up">There is no <emph>formal specification</emph></li>
+			<ul>
+				<li class="fragment fade-up">Only informal standard</li>
+				<li class="fragment fade-up">Some things are up to the implementation</li>
+				<li class="fragment fade-up">Many competing standards/legacy versions</li>
+			</ul>
+		</ul>
+		<li class="fragment fade-up">Why does C persist?</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Alternatives</h3>
+	<ul>
+		<li class="fragment fade-up">Programming language popularity (IEEE Spectrum, 2023)</li>
+		<ol>
+			<li class="fragment fade-up">Python</li>
+			<li class="fragment fade-up">Java</li>
+			<li class="fragment fade-up">C++</li>
+			<li class="fragment fade-up">C</li>
+			<li class="fragment fade-up">JavaScript</li>
+			<li class="fragment fade-up">C#</li>
+		</ol>
+		<li class="fragment fade-up">How viable are these for ES programming?</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Python</h3>
+	<ul>
+		<li class="fragment fade-up">MicroPython</li>
+		<ul>
+			<li class="fragment fade-up">Python3 runtime for microcontrollers</li>
+			<li class="fragment fade-up">Initial release 2014</li>
+			<li class="fragment fade-up">Can run on baremetal or (RT)OS</li>
+			<ul>
+				<li class="fragment fade-up">E.g. there is a port running on top of Zephyr</li>
+			</ul>
+		</ul>
+		<li class="fragment fade-up">Python code gets compiled to bytecode</li>
+		<li class="fragment fade-up">Virtual machine interprets bytecode</li>
+		<li class="fragment fade-up">Native code emitter also exists</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Python</h3>
+	<ul>
+		<li class="fragment fade-up">ESA has pre-qualified a MicroPython VM for the LEON processor</li>
+		<li class="fragment fade-up">Can be used for scheduling experiments on satellites</li>
+		<li class="fragment fade-up">More: <a href="https://essr.esa.int/project/micropython-for-leon-pre-qualified-version">European Space Software Repository</a></li>
+	</ul>
+</section>
+
+<section>
+	<h3>Java</h3>
+	<ul>
+		<li class="fragment fade-up">Many competing implementations for ES</li>
+		<ul>
+			<li class="fragment fade-up">Android</li>
+			<li class="fragment fade-up">Java SE Embedded</li>
+			<li class="fragment fade-up">Java ME</li>
+			<li class="fragment fade-up">Real-Time Specification for Java (RTSJ)</li>
+			<ul>
+				<li class="fragment fade-up">JamaicaVM</li>
+			</ul>
+			<li class="fragment fade-up">Java Card</li>
+			<li class="fragment fade-up">Even HW implementations exist(ed)</li>
+			<ul>
+				<li class="fragment fade-up">picoJava (Sun Microsystems)</li>
+				<li class="fragment fade-up">aJile (most commercially successful)</li>
+				<li class="fragment fade-up">Jazelle (ARM + Java)</li>
+			</ul>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>JavaScript</h3>
+	<ul>
+		<li class="fragment fade-up">Currently no serious implementation</li>
+		<li class="fragment fade-up">Possibly in the future: <emph>WebAssembly</emph> (WASM)</li>
+		<ul>
+			<li class="fragment fade-up">Portable bytecode format</li>
+			<li class="fragment fade-up">Open standard</li>
+			<li class="fragment fade-up">Focus on security and isolation</li>
+			<li class="fragment fade-up">WebAssembly System Interface (WASI)</li>
+			<li class="fragment fade-up">Also lots of academic research with WASM focus</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>C#</h3>
+	<ul>
+		<li class="fragment fade-up">Two implementations</li>
+		<li class="fragment fade-up">.NET Micro Framework</li>
+		<ul>
+			<li class="fragment fade-up">In theory still part of .NET foundation</li>
+			<li class="fragment fade-up">Development not very active anymore</li>
+		</ul>
+		<li class="fragment fade-up">TinyCLR OS</li>
+		<ul>
+			<li class="fragment fade-up">By GHI Electronics</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Synchronous Languages</h1>
+</section>
+
+<section>
+	<h3>Background</h3>
+	<ul>
+		<li class="fragment fade-up">Languages with built-in timing semantics</li>
+		<li class="fragment fade-up">Allow reasoning about real-time behaviour</li>
+		<li class="fragment fade-up">Determinism even with concurrency</li>
+		<li class="fragment fade-up">Can use the same language for</li>
+		<ul>
+			<li class="fragment fade-up">Specification</li>
+			<li class="fragment fade-up">Prototyping</li>
+			<li class="fragment fade-up">Implementation</li>
+		</ul>
+		<li class="fragment fade-up">Lustre, Esterel, Signal</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Synchronous Hypothesis</h3>
+	<ul>
+		<li class="fragment fade-up">Originates from circuit design</li>
+		<li class="fragment fade-up">Electronic circuits are often designed without timing in mind</li>
+		<li class="fragment fade-up">We assume that output changes instantaneous with inputs</li>
+		<li class="fragment fade-up">Works if circuit reacts faster than input signal changes</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Synchronous Hypothesis</h3>
+	<ul>
+		<li class="fragment fade-up">We can do the same for programs</li>
+		<li class="fragment fade-up">Assume there is a global clock with a periodic tick</li>
+		<li class="fragment fade-up">If computation time is << than the tick interval length</li>
+		<ul>
+			<li class="fragment fade-up">Computation starts and ends within the same tick</li>
+			<li class="fragment fade-up">Tick length is smallest unit of time</li>
+			<li class="fragment fade-up">=> All computation in "zero" time</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>History of Lustre</h3>
+	<ul>
+		<li class="fragment fade-up">Invented in the 80s at Verimag (France)</li>
+		<li class="fragment fade-up">Continuously developed since then</li>
+		<li class="fragment fade-up">Currently two implementations</li>
+		<ul>
+			<li class="fragment fade-up">Academic compiler (V4, V6)</li>
+			<li class="fragment fade-up">Commercial version (SCADE)</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>Early applications</h3>
+	<ul>
+		<li class="fragment fade-up">Saga (tool based on Lustre)</li>
+		<ul>
+			<li class="fragment fade-up">Monitoring and emergency stop system of nuclear power plant</li>
+		</ul>
+		<li class="fragment fade-up">SAO (other tool based on Lustre)</li>
+		<ul>
+			<li class="fragment fade-up">Flight control system of Airbus A320</li>
+		</ul>
+		<li class="fragment fade-up">Both tools were later combined by a company (Verilog)</li>
+	</ul>
+</section>
+
+<section>
+	<h3>History of Lustre/SCADE</h3>
+	<ul>
+		<li class="fragment fade-up">Nowadays one of the standard languages for safety-critical systems</li>
+		<li class="fragment fade-up">Avionics, automotive, ...</li>
+		<li class="fragment fade-up">Certified tools exists (SCADE compiler was one of the first certified compilers)</li>
+		<li class="fragment fade-up">Significant portion of A380 code is written in SCADE</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Ideas behind Lustre</h3>
+	<ul>
+		<li class="fragment fade-up">Most embedded software is not written by computer scientists</li>
+		<li class="fragment fade-up">Usually by control engineers, domain experts, ...</li>
+		<li class="fragment fade-up">They are used to think in terms of (differential) equations</li>
+		<li class="fragment fade-up">Often expressed as block-diagrams</li>
+		<li class="fragment fade-up">Simulink follows a similar concept</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Lustre paradigms</h3>
+	<ul>
+		<li class="fragment fade-up"><emph>Dataflow</emph> language</li>
+		<ul>
+			<li class="fragment fade-up">Similar to Simulink</li>
+			<li class="fragment fade-up">Changes in input force changes in output</li>
+		</ul>
+		<li class="fragment fade-up"><emph>Synchronous</emph> language</li>
+		<ul>
+			<li class="fragment fade-up">"zero-time" semantics</li>
+			<li class="fragment fade-up">Concurrency inbuilt + deterministic</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>Lustre paradigms</h3>
+	<ul>
+		<li class="fragment fade-up"><emph>Declarative</emph> language</li>
+		<ul>
+			<li class="fragment fade-up">Similar to functional programming</li>
+			<li class="fragment fade-up">Program in terms of definitions, not statements</li>
+		</ul>
+		<li class="fragment fade-up">Overall, Lustre is a very minimal language</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Tool chains</h3>
+	<ul>
+		<li class="fragment fade-up">Different backends</li>
+		<ul>
+			<li class="fragment fade-up">C</li>
+			<li class="fragment fade-up">VHDL</li>
+			<li class="fragment fade-up">...</li>
+		</ul>
+		<li class="fragment fade-up">Good V&V support</li>
+		<ul>
+			<li class="fragment fade-up">Automatic testing</li>
+			<li class="fragment fade-up">Static verification, model checking</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>Main concepts</h3>
+	<ul>
+		<li class="fragment fade-up">Programs are a collection of <emph>nodes</emph></li>
+		<li class="fragment fade-up">Each node has a set of inputs, and a set of outputs</li>
+		<li class="fragment fade-up">By default, every node runs on the same clock</li>
+		<li class="fragment fade-up">Nodes build a network</li>
+		<li class="fragment fade-up">On every tick, every node takes every input and calculates every output</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Main concepts</h3>
+	<ul>
+		<li class="fragment fade-up">Variables inside nodes are not just values</li>
+		<li class="fragment fade-up">They represent <emph>flows</emph> or <emph>streams</emph></li>
+		<ul>
+			<li class="fragment fade-up">Infinite streams of values</li>
+		</ul>
+		<li class="fragment fade-up">A node is a collection of equations about streams</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Basic Syntax</h3>
+	<pre class="text"><code data-trim data-noescape data-line-numbers="">
+		node ADD (a : int; b : int) returns (sum : int); 
+		let 
+			sum = a + b; 
+		tel 
+	</code></pre>
+</section>
+
+<section>
+	<h3>Operators</h3>
+	<ul>
+		<li class="fragment fade-up">Standard arithmetic and boolean operators</li>
+		<li class="fragment fade-up">If-then-else is an expression, not a statement!</li>
+		<li class="fragment fade-up">Temporal operators</li>
+		<ul>
+			<li class="fragment fade-up"><emph>pre</emph> (previous value)</li>
+			<li class="fragment fade-up"><emph>-></emph> (followed by)</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>Temporal operators</h3>
+	<pre class="text"><code data-trim data-noescape data-line-numbers="">
+		node EDGE (in : bool) returns (out : bool); 
+		let 
+			out = false -> in and not pre (in); 
+		tel 
+	</code></pre>
+</section>
+
+<section>
+	<h3>Temporal operators</h3>
+	<ul>
+		<li class="fragment fade-up">pre and -> usually come in pairs</li>
+		<li class="fragment fade-up">First element of stream shifted by pre is otherwise not defined</li>
+		<li class="fragment fade-up">Compiler has initialization analysis inbuilt</li>
+	</ul>
+</section>
+
+<section>
+	<h3>Other features</h3>
+	<ul>
+		<li class="fragment fade-up">Multiple clocks</li>
+		<ul>
+			<li class="fragment fade-up">Clocks other than the base clock can be defined</li>
+			<li class="fragment fade-up">Compiler uses <emph>clock-calculus</emph> to check program</li>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h3>Rest of this course</h3>
+	<ul>
+		<li>No lecture tomorrow!</li>
+		<li>3 more labs</li>
+		<li>When you have presented lab 3 ...</li>
+		<ul>
+			<li>if you do the project course -> keep Lab Kit</li>
+			<li>otherwise return it to one of the TAs</li>
+		</ul>
+		<li>
+			Next week: Exam preparation 
+		</li>
+	</ul>
+
+</section>
+
+<section>
+	<h1>Thanks for today!</h1>
+</section>
+
+<!-- END SLIDES -->
+</div>
+</div>
+		<script src="reveal.js/dist/reveal.js"></script>
+		<script src="reveal.js/plugin/notes/notes.js"></script>
+		<script src="reveal.js/plugin/markdown/markdown.js"></script>
+		<script src="reveal.js/plugin/highlight/highlight.js"></script>
+		<script src="reveal.js/plugin/math/math.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+				controlsTutorial: false,
+				transition: 'fade', 
+				slideNumber: 'c', 
+				pdfSeparateFragments: false, 
+				navigationMode: 'linear', 
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMath.KaTeX, RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
